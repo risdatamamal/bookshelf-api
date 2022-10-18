@@ -6,7 +6,6 @@ const {
   deleteBookByIdHandler,
 } = require('./handler');
 
-/* eslint-disable linebreak-style */
 const routes = [
   {
     method: 'POST',

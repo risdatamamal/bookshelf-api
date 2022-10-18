@@ -33,11 +33,28 @@ const addBookHandler = (request, h) => {
     updatedAt,
   };
 
+  if (name === undefined) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message:
+        'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+    response.code(400);
+    return response;
+  }
+
   books.push(newBook);
 
   const isSuccess = books.filter((book) => book.id === id).length > 0;
-  const isSuccess1 = books.filter((book) => book.name === name);
-  const isSuccess2 = books.filter((book) => book.readPage < book.pageCount);
 
   if (isSuccess) {
     const response = h.response({
@@ -47,25 +64,8 @@ const addBookHandler = (request, h) => {
         bookId: id,
       },
     });
-    response.header(
-      'Access-Control-Allow-Origin',
-      'http://localhost:5000',
-    );
+    response.header('Access-Control-Allow-Origin', 'http://localhost:5000');
     response.code(201);
-    return response;
-  } if (!isSuccess1) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku',
-    });
-    response.code(400);
-    return response;
-  } if (!isSuccess2) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
-    });
-    response.code(400);
     return response;
   }
 
@@ -80,7 +80,11 @@ const addBookHandler = (request, h) => {
 const getAllBooksHandler = () => ({
   status: 'success',
   data: {
-    books,
+    books: books.map((book) => ({
+      id: book.id,
+      name: book.name,
+      publisher: book.publisher,
+    })),
   },
 });
 
@@ -123,10 +127,28 @@ const editBookByIdHandler = (request, h) => {
   const updatedAt = new Date().toISOString();
 
   const index = books.findIndex((book) => book.id === id);
-  const nameBooks = books.filter((book) => book.name === name);
-  const readpageBooks = books.filter((book) => book.readPage < book.pageCount);
+  const nameBooks = books.name != null;
+  const readpageBooks = books.readPage > books.pageCount;
 
-  if (index !== -1) {
+  if (name === undefined) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (index !== -1 && nameBooks && readpageBooks) {
     books[index] = {
       ...books[index],
       name,
@@ -145,20 +167,6 @@ const editBookByIdHandler = (request, h) => {
       message: 'Buku berhasil diperbarui',
     });
     response.code(200);
-    return response;
-  } if (nameBooks == null) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal memperbarui buku. Mohon isi nama buku',
-    });
-    response.code(400);
-    return response;
-  } if (!readpageBooks) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
-    });
-    response.code(400);
     return response;
   }
 
