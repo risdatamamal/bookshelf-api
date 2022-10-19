@@ -125,10 +125,7 @@ const editBookByIdHandler = (request, h) => {
   } = request.payload;
 
   const updatedAt = new Date().toISOString();
-
   const index = books.findIndex((book) => book.id === id);
-  const nameBooks = books.name != null;
-  const readpageBooks = books.readPage > books.pageCount;
 
   if (name === undefined) {
     const response = h.response({
@@ -148,7 +145,7 @@ const editBookByIdHandler = (request, h) => {
     return response;
   }
 
-  if (index !== -1 && nameBooks && readpageBooks) {
+  if (index !== -1) {
     books[index] = {
       ...books[index],
       name,
@@ -162,12 +159,10 @@ const editBookByIdHandler = (request, h) => {
       updatedAt,
     };
 
-    const response = h.response({
+    return {
       status: 'success',
       message: 'Buku berhasil diperbarui',
-    });
-    response.code(200);
-    return response;
+    };
   }
 
   const response = h.response({
